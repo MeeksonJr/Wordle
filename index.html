@@ -5,25 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wordle Clone</title>
     <style>
-        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background-color: #121213; color: white; }
-        #game-board { display: grid; grid-template-rows: repeat(6, 1fr); gap: 5px; margin-bottom: 20px; }
-        .row { display: grid; grid-template-columns: repeat(5, 50px); gap: 5px; }
-        .cell { width: 50px; height: 50px; border: 2px solid #3a3a3c; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: bold; text-transform: uppercase; }
-        #controls { margin-top: 20px; }
-        button { padding: 10px 20px; font-size: 1rem; cursor: pointer; }
+        body { font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; background-color: #121213; color: white; margin: 0; min-height: 100vh; }
+        h1 { margin: 20px 0; }
+        #game-board { display: grid; grid-template-rows: repeat(6, 60px); gap: 5px; margin-bottom: 20px; }
+        .row { display: grid; grid-template-columns: repeat(5, 60px); gap: 5px; }
+        .cell { width: 60px; height: 60px; border: 2px solid #3a3a3c; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: bold; text-transform: uppercase; }
+        #controls { display: flex; gap: 10px; margin-bottom: 20px; }
+        button { padding: 10px 20px; font-size: 1rem; cursor: pointer; background: #3a3a3c; color: white; border: none; border-radius: 4px; }
+        #keyboard { display: grid; grid-template-columns: repeat(10, 30px); gap: 5px; justify-content: center; }
+        .key { padding: 10px; background: #818384; border-radius: 4px; cursor: pointer; text-align: center; }
     </style>
 </head>
 <body>
     <h1>Wordle</h1>
     <div id="game-board"></div>
     <div id="controls">
-        <button onclick="revealWord()">Reveal Word</button>
         <button onclick="showHint()">Hint</button>
+        <button onclick="revealWord()">Reveal Word</button>
     </div>
+    <div id="keyboard"></div>
     <script>
         const targetWord = "APPLE";
-        let currentRow = 0;
         const board = document.getElementById('game-board');
+        const keyboard = document.getElementById('keyboard');
+        
         for(let i=0; i<6; i++) {
             const row = document.createElement('div'); row.className = 'row';
             for(let j=0; j<5; j++) {
@@ -32,15 +37,32 @@
             }
             board.appendChild(row);
         }
+
+        const keys = "QWERTYUIOPASDFGHJKLZXCVBNM".split('');
+        keys.forEach(k => {
+            const div = document.createElement('div'); div.className = 'key'; div.textContent = k;
+            div.onclick = () => handleInput(k);
+            keyboard.appendChild(div);
+        });
+
+        let currentRow = 0;
+        let currentCell = 0;
+
+        function handleInput(key) {
+            if (currentCell < 5) {
+                board.children[currentRow].children[currentCell].textContent = key;
+                currentCell++;
+            }
+        }
+
         function revealWord() { alert("The word is: " + targetWord); }
         function showHint() { alert("Hint: It is a fruit."); }
-        // Simple input listener for prototype
+        
         document.addEventListener('keydown', (e) => {
-            if (e.key.length === 1 && /^[a-zA-Z]$/.test(e.key)) {
-                const cells = board.children[currentRow].children;
-                for(let cell of cells) {
-                    if(!cell.textContent) { cell.textContent = e.key; break; }
-                }
+            if (/^[a-zA-Z]$/.test(e.key)) handleInput(e.key.toUpperCase());
+            if (e.key === "Backspace" && currentCell > 0) {
+                currentCell--;
+                board.children[currentRow].children[currentCell].textContent = '';
             }
         });
     </script>
